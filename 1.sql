@@ -138,7 +138,7 @@ DELETE FROM BOOK WHERE BOOK_ID=3
 
 -- 4. Partition the BOOK table based on year of publication. Demonstrate its working with a simplequery.
 
-CREATE TABLE book (
+CREATE TABLE book1 (
     book_id VARCHAR(10),
     title VARCHAR(20),
     publisher_name VARCHAR(20),
