@@ -138,7 +138,19 @@ DELETE FROM BOOK WHERE BOOK_ID=3
 
 -- 4. Partition the BOOK table based on year of publication. Demonstrate its working with a simplequery.
 
-CREATE VIEW V_PUBLICATION AS SELECT PUB_YEAR FROM BOOK; 
+CREATE TABLE book (
+    book_id VARCHAR(10),
+    title VARCHAR(20),
+    publisher_name VARCHAR(20),
+    pub_year INT NOT NULL,
+    PRIMARY KEY (book_id, pub_year),
+    FOREIGN KEY (publisher_name) REFERENCES publisher(name) ON DELETE CASCADE
+)
+PARTITION BY RANGE (pub_year) (
+    PARTITION p1 VALUES LESS THAN (2005),
+    PARTITION p2 VALUES LESS THAN (2025)
+);
+
 
 -- 5.Create a view of all books and its number of copies that are currently available in the Library.
 
