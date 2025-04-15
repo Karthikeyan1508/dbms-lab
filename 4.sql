@@ -103,53 +103,9 @@ FROM IAMARKS
 WHERE USN = '1RN13CS091';
 
 -- Query 4: Stored procedure to calculate average IA marks
-DROP PROCEDURE IF EXISTS AVGMARKS;
-DELIMITER $$
-CREATE PROCEDURE AVGMARKS()
-BEGIN
-    DECLARE C_USN VARCHAR(15);
-    DECLARE C_SUBCODE VARCHAR(10);
-    DECLARE C_A INT;
-    DECLARE C_B INT;
-    DECLARE C_C INT;
-    DECLARE C_SM INT;
-    DECLARE C_AV FLOAT;
-    DECLARE done INT DEFAULT FALSE;
-
-    DECLARE C_IAMARKS CURSOR FOR
-    SELECT USN, SUBCODE, TEST1, TEST2, TEST3
-    FROM IAMARKS
-    WHERE FINALIA IS NULL;
-
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-
-    OPEN C_IAMARKS;
-
-    fetch_loop: LOOP
-        FETCH C_IAMARKS INTO C_USN, C_SUBCODE, C_A, C_B, C_C;
-        IF done THEN
-            LEAVE fetch_loop;
-        END IF;
-        
-        IF C_A != C_B THEN
-            SET C_SM = C_A + C_B;
-        ELSE
-            SET C_SM = C_A + C_C;
-        END IF;
-
-        SET C_AV = C_SM / 2;
-        
-        UPDATE IAMARKS
-        SET FINALIA = C_AV
-        WHERE USN = C_USN AND SUBCODE = C_SUBCODE;
-    END LOOP;
-    
-    CLOSE C_IAMARKS;
-END $$
-DELIMITER ;
-
 SET SQL_SAFE_UPDATES = 0;
-CALL AVGMARKS();
+  UPDATE IA_MARKS
+  SET FINALIA = (TEST1 + TEST2 + TEST3 - LEAST(TEST1, TEST2, TEST3)) / 2.0;
 SET SQL_SAFE_UPDATES = 1;
 
 -- Query 5: Categorizing students based on IA marks
