@@ -49,27 +49,50 @@ CREATE TABLE WORKS_ON (
 );
 
 -- Insert Sample Data
+-- Insert departments first (without manager)
+INSERT INTO DEPARTMENT (DNO, DNAME, MGRSTARTDATE) VALUES 
+('1', 'ACCOUNTS', '2001-01-01'),
+('2', 'IT', '2016-08-01'),
+('3', 'ECE', '2008-06-01'),
+('4', 'ISE', '2015-08-01'),
+('5', 'CSE', '2002-06-01');
+
+-- Insert employees
 INSERT INTO EMPLOYEE VALUES 
-('RNSECE01', 'JOHN', 'SCOTT', 'BANGALORE', 'M', 450000, NULL, '3'),
-('RNSCSE01', 'JAMES', 'SMITH', 'BANGALORE', 'M', 500000, 'RNSCSE02', '5'),
-('RNSCSE02', 'HEARN', 'BAKER', 'BANGALORE', 'M', 700000, 'RNSCSE03', '5'),
-('RNSCSE03', 'EDWARD', 'SCOTT', 'MYSORE', 'M', 500000, 'RNSCSE04', '5'),
-('RNSCSE04', 'PAVAN', 'HEGDE', 'MANGALORE', 'M', 650000, 'RNSCSE05', '5');
+('EMP001', 'JOHN', 'SCOTT', 'BANGALORE', 'M', 450000, NULL, '3'),
+('EMP002', 'JAMES', 'SMITH', 'BANGALORE', 'M', 500000, NULL, '5');
 
-INSERT INTO DEPARTMENT VALUES 
-('1', 'ACCOUNTS', '2001-01-01', 'RNSACC02'),
-('2', 'IT', '2016-08-01', 'RNSIT01'),
-('3', 'ECE', '2008-06-01', 'RNSECE01'),
-('4', 'ISE', '2015-08-01', 'RNSISE01'),
-('5', 'CSE', '2002-06-01', 'RNSCSE05');
+-- Insert more employees
+INSERT INTO EMPLOYEE VALUES
+('EMP003', 'HEARN', 'BAKER', 'BANGALORE', 'M', 700000, 'EMP002', '5'),
+('EMP004', 'EDWARD', 'SCOTT', 'MYSORE', 'M', 500000, 'EMP002', '5'),
+('EMP005', 'PAVAN', 'HEGDE', 'MANGALORE', 'M', 650000, 'EMP002', '5'),
+('EMP006', 'ALEX', 'MORGAN', 'BANGALORE', 'M', 620000, 'EMP002', '5'),
+('EMP007', 'LISA', 'SCOTT', 'BANGALORE', 'F', 710000, 'EMP002', '5'),
+('EMP008', 'EMMA', 'WATSON', 'MANGALORE', 'F', 680000, 'EMP003', '5'),
+('EMP009', 'STEVE', 'JOBS', 'BANGALORE', 'M', 850000, 'EMP001', '1'),
+('EMP010', 'MARK', 'ACCOUNTS', 'BANGALORE', 'M', 750000, 'EMP009', '1'),
+('EMP011', 'SARA', 'TECH', 'BANGALORE', 'F', 680000, NULL, '2'),
+('EMP012', 'MIKE', 'ENGINEER', 'BANGALORE', 'M', 620000, 'EMP011', '2'),
+('EMP013', 'TOM', 'ISE', 'MANGALORE', 'M', 680000, NULL, '4');
 
+-- Update department with manager SSN
+UPDATE DEPARTMENT SET MGRSSN = 'EMP009' WHERE DNO = '1';
+UPDATE DEPARTMENT SET MGRSSN = 'EMP011' WHERE DNO = '2';
+UPDATE DEPARTMENT SET MGRSSN = 'EMP001' WHERE DNO = '3';
+UPDATE DEPARTMENT SET MGRSSN = 'EMP013' WHERE DNO = '4';
+UPDATE DEPARTMENT SET MGRSSN = 'EMP003' WHERE DNO = '5';
+
+-- Insert locations
 INSERT INTO DLOCATION VALUES 
 ('BANGALORE', '1'),
 ('BANGALORE', '2'),
 ('BANGALORE', '3'),
 ('MANGALORE', '4'),
-('MANGALORE', '5');
+('MANGALORE', '5'),
+('MYSORE', '5');
 
+-- Insert projects
 INSERT INTO PROJECT VALUES 
 (100, 'IOT', 'BANGALORE', '5'),
 (101, 'CLOUD', 'BANGALORE', '5'),
@@ -77,12 +100,22 @@ INSERT INTO PROJECT VALUES
 (103, 'SENSORS', 'BANGALORE', '3'),
 (104, 'BANK MANAGEMENT', 'BANGALORE', '1');
 
+-- Insert works_on to ensure Q4 will have results (employees working on all CSE projects)
+-- EMP007 works on all CSE projects
 INSERT INTO WORKS_ON VALUES 
-(4, 'RNSCSE01', 100),
-(6, 'RNSCSE01', 101),
-(8, 'RNSCSE01', 102),
-(10, 'RNSCSE02', 100),
-(3, 'RNSCSE04', 100);
+(4, 'EMP002', 100),
+(6, 'EMP002', 101),
+(8, 'EMP002', 102),
+(10, 'EMP003', 100),
+(3, 'EMP005', 100),
+(5, 'EMP007', 100),
+(7, 'EMP007', 101),
+(9, 'EMP007', 102),
+(11, 'EMP004', 100),
+(12, 'EMP004', 103),
+(8, 'EMP001', 103),
+(6, 'EMP009', 104),
+(7, 'EMP010', 104);
 
 -- Queries
 -- Q1: Find projects managed by or worked on by employees with last name 'SCOTT'
@@ -128,10 +161,9 @@ WHERE NOT EXISTS (
     )
 );
 
--- Q5: Find departments where more than 5 employees earn above 600000
-SELECT D.DNO, COUNT(*) AS EMP_COUNT
+-- Q5: Find departments where the average salary is above 650000
+SELECT D.DNAME, AVG(E.SALARY) AS AVG_SALARY, COUNT(*) AS EMP_COUNT
 FROM DEPARTMENT D
 JOIN EMPLOYEE E ON D.DNO = E.DNO
-WHERE E.SALARY > 600000
-GROUP BY D.DNO
-HAVING COUNT(*) > 5;
+GROUP BY D.DNAME
+HAVING AVG(E.SALARY) > 650000;
